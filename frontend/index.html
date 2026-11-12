@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DevOps Dashboard — Seed Project</title>
+    <link rel="stylesheet" href="/src/style.css" />
+</head>
+
+<body>
+    <header>
+        <h1>DevOps Dashboard</h1>
+        <p>REST API + BullMQ Worker + Redis + PostgreSQL</p>
+    </header>
+
+    <main>
+        <section class="card">
+            <h2>Health Check</h2>
+            <button id="btn-health">Cek /healthz/ready</button>
+            <pre id="health-result">-</pre>
+        </section>
+
+        <section class="card">
+            <h2>Buat Transaksi Baru</h2>
+            <form id="transaction-form">
+                <label>Jumlah (Rp)
+                    <input type="number" name="amount" required min="1" />
+                </label>
+                <label>Deskripsi
+                    <input type="text" name="description" required />
+                </label>
+                <button type="submit">Kirim ke Queue</button>
+            </form>
+            <pre id="submit-result">-</pre>
+        </section>
+
+        <section class="card">
+            <h2>Daftar Transaksi</h2>
+            <button id="btn-refresh">Muat Ulang</button>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Jumlah</th>
+                        <th>Deskripsi</th>
+                        <th>Status</th>
+                        <th>Dibuat</th>
+                    </tr>
+                </thead>
+                <tbody id="transaction-rows">
+                    <tr>
+                        <td colspan="5">Belum ada data.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
