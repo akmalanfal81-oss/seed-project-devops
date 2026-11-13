@@ -3,25 +3,32 @@
 # Frontend Multi-Stage Dockerfile
 # ============================================================
 
-# ---------- Stage 1: Builder ----------
+# [YOSUA] Stage 1: Builder. Menggunakan Node.js 20 Alpine untuk build Vite.
+# Ukuran stage ini boleh besar karena tidak akan dikirim ke production.
 FROM node:20-alpine AS builder
 WORKDIR /app
 COPY package*.json ./
+# [YOSUA] npm ci memastikan instalasi dependency sesuai package-lock.json (reproducible).
 RUN npm ci
 COPY . .
+# [YOSUA] Menghasilkan folder 'dist' berisi aset statis HTML, CSS, dan JS siap pakai.
 RUN npm run build
 
-# ---------- Stage 2: Runtime ----------
+# [YOSUA] Stage 2: Runtime. Hanya menggunakan Nginx Alpine (sangat ringan, target ≤ 30 MB).
 FROM nginx:1.27-alpine AS runtime
 
+# [YOSUA] Menghapus konfigurasi default Nginx agar tidak bentrok dengan konfigurasi kita.
 RUN rm -f /etc/nginx/conf.d/default.conf
 
+# [YOSUA] Menyalin hasil build Vite dari stage builder ke direktori Nginx.
 COPY --from=builder /app/dist /usr/share/nginx/html
+# [YOSUA] Menyalin konfigurasi reverse proxy yang kita buat khusus untuk Docker.
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 80
 
+# [YOSUA] Healthcheck native untuk memastikan web server Nginx berjalan.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-    CMD wget -q -O /dev/null http://127.0.0.1:80/ || exit 1
+  CMD wget -q -O /dev/null http://127.0.0.1:80/ || exit 1
 
 CMD ["nginx", "-g", "daemon off;"]
