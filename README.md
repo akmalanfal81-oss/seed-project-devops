@@ -3,9 +3,9 @@
 Repositori ini dibuat untuk memenuhi Ujian Tengah Semester (UTS) mata kuliah DevOps. Proyek ini mendemonstrasikan implementasi **Multi-Stage Docker Build**, **Docker Compose Orchestration (5 Services)**, dan **Multi-Process Node.js** (REST API & Asynchronous Worker).
 
 ## 👥 Anggota Kelompok & Pembagian Tugas
-1. **Akmal** (NIM: 42430041) - *Git Workflow, Backend Dockerfile, & Live Clean-boot*
-2. **Yosua** (NIM: 42430006) - *Frontend Dockerfile, Nginx Reverse Proxy, & DB Migration*
-3. **Daniel** (NIM: 42430017) - *Docker Compose Orchestration, Queue Logic, & Automated Test*
+1. **Akmal** (NIM: **42430041**) - *Git Workflow, Backend Dockerfile, & Live Clean-boot*
+2. **Yosua** (NIM: **42430006**) - *Frontend Dockerfile, Nginx Reverse Proxy, & DB Migration*
+3. **Daniel** (NIM: **42430017**) - *Docker Compose Orchestration, Queue Logic, & Automated Test*
 
 ---
 
