@@ -1,7 +1,7 @@
 name: seed-project-devops
 
 services:
-  # 1. PostgreSQL
+  # [DANIEL] Layanan 1: Database PostgreSQL. Menggunakan volume persisten.
   postgres:
     image: postgres:16-alpine
     restart: unless-stopped
@@ -12,7 +12,8 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      # [DANIEL] Mengecek apakah Postgres benar-benar siap menerima koneksi (pg_isready).
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
       interval: 5s
       timeout: 5s
       retries: 10
@@ -20,12 +21,13 @@ services:
     networks:
       - app-network
 
-  # 2. Redis
+  # [DANIEL] Layanan 2: Redis sebagai message broker untuk antrean (Queue) BullMQ.
   redis:
     image: redis:7-alpine
     restart: unless-stopped
     healthcheck:
-      test: [ "CMD", "redis-cli", "ping" ]
+      # [DANIEL] Mengecek apakah Redis membalas 'PONG' (berarti siap).
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 10
@@ -33,7 +35,7 @@ services:
     networks:
       - app-network
 
-  # 3. API (Express REST)
+  # [DANIEL] Layanan 3: REST API (Express). Ini yang diekspos ke publik (port 3000).
   api:
     build:
       context: ../backend
@@ -51,20 +53,22 @@ services:
       REDIS_PORT: 6379
     depends_on:
       postgres:
+        # [DANIEL] Mencegah Race Condition: API tidak akan jalan sebelum Postgres healthy.
         condition: service_healthy
       redis:
+        # [DANIEL] API tidak akan jalan sebelum Redis healthy.
         condition: service_healthy
     networks:
       - app-network
 
-  # 4. Worker (BullMQ, tanpa expose port)
+  # [DANIEL] Layanan 4: Worker BullMQ. Berjalan di background tanpa expose port.
   worker:
     build:
       context: ../backend
       dockerfile: Dockerfile
       target: runtime
     restart: unless-stopped
-    command: [ "node", "src/worker.js" ]
+    command: ["node", "src/worker.js"]
     env_file:
       - .env
     environment:
@@ -80,7 +84,7 @@ services:
     networks:
       - app-network
 
-  # 5. Frontend (nginx:alpine)
+  # [DANIEL] Layanan 5: Frontend (Nginx). Bertindak sebagai reverse proxy ke API.
   frontend:
     build:
       context: ../frontend
@@ -94,14 +98,14 @@ services:
     networks:
       - app-network
 
-  # Test service (profile "test", tidak ikut `up -d` default)
+  # [DANIEL] Service tambahan untuk menjalankan Vitest (hanya jalan jika dipanggil profil 'test').
   backend-test:
-    profiles: [ "test" ]
+    profiles: ["test"]
     build:
       context: ../backend
       dockerfile: Dockerfile
       target: test
-    command: [ "npm", "test" ]
+    command: ["npm", "test"]
     env_file:
       - .env
     environment:
@@ -110,9 +114,12 @@ services:
       - app-network
 
 volumes:
+  # [DANIEL] Named volume untuk persistensi data PostgreSQL. 
+  # Data tidak hilang saat container mati, kecuali dihapus dengan 'down -v'.
   pgdata:
     driver: local
 
 networks:
+  # [DANIEL] Bridge network agar semua container bisa saling komunikasi via nama service-nya.
   app-network:
     driver: bridge
